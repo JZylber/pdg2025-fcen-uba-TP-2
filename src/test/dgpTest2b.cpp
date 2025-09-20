@@ -31,7 +31,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+
 #include <string>
 #include <iostream>
 
@@ -48,37 +48,41 @@ using namespace std;
 #include <io/SaverWrl.hpp>
 #include "dgpPrt.hpp"
 
-class Data {
+class Data
+{
 public:
-  bool   _debug;
-  bool   _binaryOutput;
-  bool   _removeNormal;
-  bool   _removeColor;
-  bool   _removeTexCoord;
+  bool _debug;
+  bool _binaryOutput;
+  bool _removeNormal;
+  bool _removeColor;
+  bool _removeTexCoord;
   string _inFile;
   string _outFile;
+
 public:
-  Data():
-    _debug(false),
-    _binaryOutput(false),
-    _removeNormal(false),
-    _removeColor(false),
-    _removeTexCoord(false),
-    _inFile(""),
-    _outFile("")
-  { }
+  Data() : _debug(false),
+           _binaryOutput(false),
+           _removeNormal(false),
+           _removeColor(false),
+           _removeTexCoord(false),
+           _inFile(""),
+           _outFile("")
+  {
+  }
 };
 
-void options(Data& D) {
-  cout << "   -d|-debug               [" << tv(D._debug)          << "]" << endl;
-  cout << "   -b|-binaryOutput        [" << tv(D._binaryOutput)   << "]" << endl;
-  cout << "   -r|-removeProperties    [" << tv(D._removeNormal)   << "]" << endl;
-  cout << "  -rn|-removeNormal        [" << tv(D._removeNormal)   << "]" << endl;
-  cout << "  -rc|-removeColor         [" << tv(D._removeColor)    << "]" << endl;
+void options(Data &D)
+{
+  cout << "   -d|-debug               [" << tv(D._debug) << "]" << endl;
+  cout << "   -b|-binaryOutput        [" << tv(D._binaryOutput) << "]" << endl;
+  cout << "   -r|-removeProperties    [" << tv(D._removeNormal) << "]" << endl;
+  cout << "  -rn|-removeNormal        [" << tv(D._removeNormal) << "]" << endl;
+  cout << "  -rc|-removeColor         [" << tv(D._removeColor) << "]" << endl;
   cout << "  -rt|-removeTexCoord      [" << tv(D._removeTexCoord) << "]" << endl;
 }
 
-void usage(Data& D) {
+void usage(Data &D)
+{
   cout << "USAGE: dgpTest2b [options] inFile outFile" << endl;
   cout << "   -h|-help" << endl;
   options(D);
@@ -86,50 +90,78 @@ void usage(Data& D) {
   exit(0);
 }
 
-void error(const char *msg) {
-  cout << "ERROR: dgpTest2b | " << ((msg)?msg:"") << endl;
+void error(const char *msg)
+{
+  cout << "ERROR: dgpTest2b | " << ((msg) ? msg : "") << endl;
   exit(0);
 }
-
+
 //////////////////////////////////////////////////////////////////////
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   Data D;
 
-  if(argc==1) usage(D);
+  if (argc == 1)
+    usage(D);
 
-  for(int i=1;i<argc;i++) {
-    if(string(argv[i])=="-h" || string(argv[i])=="-help") {
+  for (int i = 1; i < argc; i++)
+  {
+    if (string(argv[i]) == "-h" || string(argv[i]) == "-help")
+    {
       usage(D);
-    } else if(string(argv[i])=="-d" || string(argv[i])=="-debug") {
+    }
+    else if (string(argv[i]) == "-d" || string(argv[i]) == "-debug")
+    {
       D._debug = !D._debug;
-    } else if(string(argv[i])=="-b" || string(argv[i])=="-binaryOutput") {
+    }
+    else if (string(argv[i]) == "-b" || string(argv[i]) == "-binaryOutput")
+    {
       D._binaryOutput = !D._binaryOutput;
-    } else if(string(argv[i])=="-r" || string(argv[i])=="-removeProperties") {
-      D._removeNormal   = !D._removeNormal;
-      D._removeColor    = !D._removeColor;
-      D._removeTexCoord = !D._removeTexCoord;
-    } else if(string(argv[i])=="-rn" || string(argv[i])=="-removeNormal") {
+    }
+    else if (string(argv[i]) == "-r" || string(argv[i]) == "-removeProperties")
+    {
       D._removeNormal = !D._removeNormal;
-    } else if(string(argv[i])=="-rc" || string(argv[i])=="-removeColor") {
       D._removeColor = !D._removeColor;
-    } else if(string(argv[i])=="-rt" || string(argv[i])=="-removeTexCoord") {
       D._removeTexCoord = !D._removeTexCoord;
-    } else if(string(argv[i])[0]=='-') {
+    }
+    else if (string(argv[i]) == "-rn" || string(argv[i]) == "-removeNormal")
+    {
+      D._removeNormal = !D._removeNormal;
+    }
+    else if (string(argv[i]) == "-rc" || string(argv[i]) == "-removeColor")
+    {
+      D._removeColor = !D._removeColor;
+    }
+    else if (string(argv[i]) == "-rt" || string(argv[i]) == "-removeTexCoord")
+    {
+      D._removeTexCoord = !D._removeTexCoord;
+    }
+    else if (string(argv[i])[0] == '-')
+    {
       error("unknown option");
-    } else if(D._inFile=="") {
+    }
+    else if (D._inFile == "")
+    {
       D._inFile = string(argv[i]);
-    } else if(D._outFile=="") {
+    }
+    else if (D._outFile == "")
+    {
       D._outFile = string(argv[i]);
-    } else {
+    }
+    else
+    {
       error("too many command line arguments");
     }
   }
 
-  if(D._inFile =="") error("no inFile");
-  if(D._outFile=="") error("no outFile");
+  if (D._inFile == "")
+    error("no inFile");
+  if (D._outFile == "")
+    error("no outFile");
 
-  if(D._debug) {
+  if (D._debug)
+  {
     cout << "dgpTest2b {" << endl;
     cout << endl;
     options(D);
@@ -145,110 +177,149 @@ int main(int argc, char **argv) {
   //////////////////////////////////////////////////////////////////////
   // create loader and saver factories
   AppLoader loaderFactory;
-  AppSaver  saverFactory;
+  AppSaver saverFactory;
 
   // register input file loaders
-  LoaderPly* plyLoader = new LoaderPly();
+  LoaderPly *plyLoader = new LoaderPly();
   loaderFactory.registerLoader(plyLoader);
-  LoaderStl* stlLoader = new LoaderStl();
+  LoaderStl *stlLoader = new LoaderStl();
   loaderFactory.registerLoader(stlLoader);
-  LoaderWrl* wrlLoader = new LoaderWrl();
+  LoaderWrl *wrlLoader = new LoaderWrl();
   loaderFactory.registerLoader(wrlLoader);
 
-  // register output file savers  
-  SaverPly* plySaver = new SaverPly();
+  // register output file savers
+  SaverPly *plySaver = new SaverPly();
   saverFactory.registerSaver(plySaver);
-  SaverStl* stlSaver = new SaverStl();
+  SaverStl *stlSaver = new SaverStl();
   saverFactory.registerSaver(stlSaver);
-  SaverWrl* wrlSaver = new SaverWrl();
+  SaverWrl *wrlSaver = new SaverWrl();
   saverFactory.registerSaver(wrlSaver);
 
   SaverStl::FileType stlFt =
-    (D._binaryOutput)?SaverStl::FileType::BINARY:SaverStl::FileType::ASCII;
+      (D._binaryOutput) ? SaverStl::FileType::BINARY : SaverStl::FileType::ASCII;
   stlSaver->setFileType(stlFt);
 
   Ply::DataType plyDt =
-    (D._binaryOutput)?Ply::DataType::BINARY_LITTLE_ENDIAN:Ply::DataType::ASCII;
+      (D._binaryOutput) ? Ply::DataType::BINARY_LITTLE_ENDIAN : Ply::DataType::ASCII;
   SaverPly::setDefaultDataType(plyDt);
 
-  if(D._debug) {
+  if (D._debug)
+  {
     SaverPly::setOstream(&cout);
     SaverPly::setIndent("    ");
   }
-
+
   //////////////////////////////////////////////////////////////////////
   // read ScheneGraph
 
   SceneGraph wrl; // create empty scene graph
 
-  if(D._debug) {
+  if (D._debug)
+  {
     cout << "  loading inFile {" << endl;
   }
 
-  success = loaderFactory.load(D._inFile.c_str(),wrl);
+  success = loaderFactory.load(D._inFile.c_str(), wrl);
 
-  if(D._debug) {
-    cout << "    success        = " << tv(success)          << endl;
+  if (D._debug)
+  {
+    cout << "    success        = " << tv(success) << endl;
     cout << "  } loading inFile" << endl;
     cout << endl;
   }
 
-  if(success==false) return -1;
+  if (success == false)
+    return -1;
 
   //////////////////////////////////////////////////////////////////////
   // process
 
-  if(D._removeNormal || D._removeColor || D._removeTexCoord ) {
-    if(D._debug) cout << "  processing {" << endl;
+  if (D._removeNormal || D._removeColor || D._removeTexCoord)
+  {
+    if (D._debug)
+      cout << "  processing {" << endl;
 
     // traverse scene graph looking for IndexedFaceSet nodes
-    Node* node;
+    Node *node;
     SceneGraphTraversal sgt(wrl);
-    for(int iIfs=0;(node=sgt.next())!=(Node*)0;iIfs++) {
-      Shape* shape = dynamic_cast<Shape*>(node);
-      if(shape==(Shape*)0) continue;
-      const string& shapeName = shape->getName();
-      
-      IndexedFaceSet* ifs =
-        dynamic_cast<IndexedFaceSet*>(shape->getGeometry());
-      if(ifs==(IndexedFaceSet*)0) continue;
+    for (int iIfs = 0; (node = sgt.next()) != (Node *)0; iIfs++)
+    {
+      Shape *shape = dynamic_cast<Shape *>(node);
+      if (shape == (Shape *)0)
+        continue;
+      const string &shapeName = shape->getName();
 
-      if(D._debug) {
+      IndexedFaceSet *ifs =
+          dynamic_cast<IndexedFaceSet *>(shape->getGeometry());
+      if (ifs == (IndexedFaceSet *)0)
+        continue;
+
+      if (D._debug)
+      {
         cout << "  before processing" << endl;
-        printIndexedFaceSetInfo(cout, shapeName, iIfs,*ifs,"    ");
+        printIndexedFaceSetInfo(cout, shapeName, iIfs, *ifs, "    ");
       }
 
       // TODO ...
-
-      if(D._debug) {
-        cout << "  after processing" << endl;
-        printIndexedFaceSetInfo(cout, shapeName, iIfs,*ifs,"    ");
+      if (D._removeNormal)
+      {
+        if (D._debug)
+          cout << "    removing normals" << endl;
+        ifs->getNormal().clear();
+        ifs->getNormalIndex().clear();
+        ifs->setNormalPerVertex(false);
+      }
+      if (D._removeColor)
+      {
+        if (D._debug)
+          cout << "    removing colors" << endl;
+        ifs->getColor().clear();
+        ifs->getColorIndex().clear();
+        ifs->setColorPerVertex(false);
+      }
+      if (D._removeTexCoord)
+      {
+        if (D._debug)
+          cout << "    removing texCoords" << endl;
+        ifs->getTexCoord().clear();
+        ifs->getTexCoordIndex().clear();
       }
 
-      if(D._debug) cout << "" << endl;
+      if (D._debug)
+      {
+        cout << "  after processing" << endl;
+        printIndexedFaceSetInfo(cout, shapeName, iIfs, *ifs, "    ");
+      }
+
+      if (D._debug)
+        cout << "" << endl;
     }
 
-    if(D._debug) cout << "  }" << endl;  
+    if (D._debug)
+      cout << "  }" << endl;
   }
-  
+
   //////////////////////////////////////////////////////////////////////
   // write
-  
-  if(D._debug) {
+
+  if (D._debug)
+  {
     cout << "  saving outFile {" << endl;
   }
 
-  success = saverFactory.save(D._outFile.c_str(),wrl);
+  success = saverFactory.save(D._outFile.c_str(), wrl);
 
-  if(D._debug) {
-    cout << "    success        = " << tv(success)          << endl;
+  if (D._debug)
+  {
+    cout << "    success        = " << tv(success) << endl;
     cout << "  } saving outFile" << endl;
     cout << endl;
   }
 
   //////////////////////////////////////////////////////////////////////
 
-  if(D._debug) {
+  if (D._debug)
+  {
     cout << "} dgpTest2b" << endl;
     fflush(stderr);
   }
