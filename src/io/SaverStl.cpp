@@ -72,11 +72,19 @@ bool SaverStl::_saveAscii(FILE *fp, const char *solidname, IndexedFaceSet &ifs) 
   float x0, x1, x2, n0, n1, n2;
   for (iF = 0; iF < nF; iF++)
   { // for each face ...
-
-    // TODO
-    // use fprintf() to print formatted text
+    fprintf(fp, " facet normal %f %f %f\n", normal[iF * 3], normal[iF * 3 + 1], normal[iF * 3 + 2]);
+    fprintf(fp, "  outer loop\n");
+    // 3 vertexes since its a triangle mesh
+    for (size_t nCorner = 0; nCorner < 3; nCorner++)
+    {
+      // If all faces are triangles, then the index in coordindex is 4*iF+nCorner
+      int iV = coordIndex[4 * iF + nCorner];
+      fprintf(fp, "   vertex %f %f %f\n", coord[iV * 3], coord[iV * 3 + 1], coord[iV * 3 + 2]);
+    }
+    fprintf(fp, "  endloop\n");
+    fprintf(fp, " endfacet\n");
   }
-
+  fprintf(fp, "endsolid %s\n", solidname);
   return true;
 }
 
