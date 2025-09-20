@@ -112,6 +112,7 @@ public:
 private:
       bool isValidIc(const int iC) const;
       bool isValidIe(const int iE) const;
+      bool isValidEdgeHalfEdge(const int iE, const int j) const;
 
 protected:
       // reference to the coordIndex passed as argument

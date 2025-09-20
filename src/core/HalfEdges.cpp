@@ -246,6 +246,11 @@ bool HalfEdges::isValidIe(const int iE) const
   return (0 <= iE && iE < getNumberOfEdges());
 }
 
+bool HalfEdges::isValidEdgeHalfEdge(const int iE, const int j) const
+{
+  return (isValidIe(iE) && 0 <= j && j < getNumberOfEdgeHalfEdges(iE));
+}
+
 int HalfEdges::getNumberOfCorners()
 {
   return static_cast<int>(_coordIndex.size());
@@ -342,9 +347,7 @@ int HalfEdges::getNumberOfEdgeHalfEdges(const int iE) const
 
 int HalfEdges::getEdgeHalfEdge(const int iE, const int j) const
 {
-  if (!isValidIe(iE))
-    return -1;
-  if (j < 0 || j >= getNumberOfEdgeHalfEdges(iE))
+  if (!isValidEdgeHalfEdge(iE, j))
     return -1;
   return _edge2HalfEdges[iE][j];
 }
