@@ -67,7 +67,7 @@ public:
 
       // returns the number of elements of the coordIndex array
 
-      int getNumberOfCorners();
+      int getNumberOfCorners() const;
 
       // returns the index of the face containing the half edge
       // corresponding to the corner index iC; if the corner index is out
@@ -109,12 +109,10 @@ public:
 
       int getEdgeHalfEdge(const int iE, const int j) const;
 
-private:
+protected:
       bool isValidIc(const int iC) const;
       bool isValidIe(const int iE) const;
       bool isValidEdgeHalfEdge(const int iE, const int j) const;
-
-protected:
       // reference to the coordIndex passed as argument
       const vector<int> &_coordIndex;
 

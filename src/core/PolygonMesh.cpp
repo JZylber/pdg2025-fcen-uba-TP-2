@@ -38,15 +38,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 // DAMAGE.
-
+
 #include <iostream>
 #include "PolygonMesh.hpp"
 #include "Partition.hpp"
 
-PolygonMesh::PolygonMesh(const int nVertices, const vector<int>& coordIndex):
-  HalfEdges(nVertices,coordIndex),
-  _nPartsVertex(),
-  _isBoundaryVertex()
+PolygonMesh::PolygonMesh(const int nVertices, const vector<int> &coordIndex) : HalfEdges(nVertices, coordIndex),
+                                                                               _nPartsVertex(),
+                                                                               _isBoundaryVertex()
 {
   int nV = getNumberOfVertices();
   int nE = getNumberOfEdges(); // Edges method
@@ -54,12 +53,19 @@ PolygonMesh::PolygonMesh(const int nVertices, const vector<int>& coordIndex):
   int nC = getNumberOfCorners();
 
   // 1) classify the vertices as boundary or internal
-  int iV;
-  for(iV=0;iV<nV;iV++)
-    _isBoundaryVertex.push_back(false);
-  // TODO
-  // - for edge boundary iE label its two end vertices as boundary 
-  
+  _isBoundaryVertex.resize(nV, false);
+  for (int iE = 0; iE < nE; iE++)
+  {
+    if (isBoundaryEdge(iE))
+    {
+      int iV0 = getVertex0(iE);
+      int iV1 = getVertex1(iE);
+      _isBoundaryVertex[iV0] = true;
+      _isBoundaryVertex[iV1] = true;
+    }
+  }
+  // - for edge boundary iE label its two end vertices as boundary
+
   // 2) create a partition of the corners in the stack
   Partition partition(nC);
   // 3) for each regular edge
@@ -67,7 +73,32 @@ PolygonMesh::PolygonMesh(const int nVertices, const vector<int>& coordIndex):
   //    - join the two pairs of corresponding corners accross the edge
   //    - you need to take into account the relative orientation of
   //      the two incident half edges
-
+  for (int iE = 0; iE < nE; iE++)
+  {
+    if (!isRegularEdge(iE))
+      continue;
+    int nHE = getNumberOfEdgeHalfEdges(iE);
+    if (nHE != 2)
+      continue; // should not happen
+    int iC0 = getEdgeHalfEdge(iE, 0);
+    int iC1 = getEdgeHalfEdge(iE, 1);
+    int iV00 = getSrc(iC0);
+    int iV01 = getDst(iC0);
+    int iV10 = getSrc(iC1);
+    int iV11 = getDst(iC1);
+    if (iV00 == iV11 && iV01 == iV10)
+    {
+      // consistently oriented
+      partition.join(iC0, iC1);
+      partition.join((iC0 + 1) % nC, (iC1 + 1) % nC);
+    }
+    else
+    {
+      // opposite orientation
+      partition.join(iC0, (iC1 + 1) % nC);
+      partition.join((iC0 + 1) % nC, iC1);
+    }
+  }
   // consistently oriented
   /* \                  / */
   /*  \ iC01 <-- iC00  /  */
@@ -90,73 +121,115 @@ PolygonMesh::PolygonMesh(const int nVertices, const vector<int>& coordIndex):
 
   // note that the partition will end up with the corner separators as
   // singletons, but it doesn't matter for the last step, and
-  // the partition will be deleteted upon return
-  
+  // the partition will be deleted upon return
+
   // 4) count number of parts per vertex
   //    - initialize _nPartsVertex array to 0's
-  //    - for each corner iC which is a representative of its subset, 
+  //    - for each corner iC which is a representative of its subset,
   //    - get the corresponding vertex index iV and increment _nPartsVertex[iV]
   //    - note that all the corners in each subset share a common
   //      vertex index, but multiple subsets may correspond to the
   //      same vertex index, indicating that the vertex is singular
+  _nPartsVertex.resize(nV, 0);
+  for (int iC = 0; iC < nC; iC++)
+  {
+    if (partition.find(iC) == iC)
+    {
+      int iV = _coordIndex[iC];
+      if (iV >= 0)
+        _nPartsVertex[iV]++;
+    }
+  }
 }
 
-int PolygonMesh::getNumberOfFaces() const {
-  // TODO
-  return 0;
+int PolygonMesh::getNumberOfFaces() const
+{
+  int nC = getNumberOfCorners();
+  int nF = 0;
+  for (int iC = 0; iC < nC; iC++)
+  {
+    if (_coordIndex[iC] < 0)
+      nF++;
+  }
+  return nF;
 }
 
-int PolygonMesh::getNumberOfEdgeFaces(const int iE) const {
+int PolygonMesh::getNumberOfEdgeFaces(const int iE) const
+{
   return getNumberOfEdgeHalfEdges(iE);
 }
 
-int PolygonMesh::getEdgeFace(const int iE, const int j) const {
-  // TODO
-  return -1;
+int PolygonMesh::getEdgeFace(const int iE, const int j) const
+{
+  if (!isValidEdgeHalfEdge(iE, j))
+    return -1;
+  int iC = getEdgeHalfEdge(iE, j);
+  return getFace(iC);
 }
 
-bool PolygonMesh::isEdgeFace(const int iE, const int iF) const {
-  // TODO
-  return false;
+bool PolygonMesh::isEdgeFace(const int iE, const int iF) const
+{
+  if (!isValidIe(iE))
+    return false;
+  int nF = getNumberOfFaces();
+  if (!(0 <= iF && iF < nF))
+    return false;
+  int nHE = getNumberOfEdgeHalfEdges(iE);
+  for (int j = 0; j < nHE; j++)
+  {
+    int iC = getEdgeHalfEdge(iE, j);
+    if (getFace(iC) == iF)
+      return true;
+  }
 }
 
 // classification of edges
 
-bool PolygonMesh::isBoundaryEdge(const int iE) const {
-  // TODO
-  return false;
+bool PolygonMesh::isBoundaryEdge(const int iE) const
+{
+  if (!isValidIe(iE))
+    return false;
+  return (getNumberOfEdgeHalfEdges(iE) == 1);
 }
 
-bool PolygonMesh::isRegularEdge(const int iE) const {
-  // TODO
-  return false;
+bool PolygonMesh::isRegularEdge(const int iE) const
+{
+  if (!isValidIe(iE))
+    return false;
+  return (getNumberOfEdgeHalfEdges(iE) == 2);
 }
 
-bool PolygonMesh::isSingularEdge(const int iE) const {
-  // TODO
-  return false;
+bool PolygonMesh::isSingularEdge(const int iE) const
+{
+  if (!isValidIe(iE))
+    return false;
+  return (getNumberOfEdgeHalfEdges(iE) > 2);
 }
 
 // classification of vertices
 
-bool PolygonMesh::isBoundaryVertex(const int iV) const {
+bool PolygonMesh::isBoundaryVertex(const int iV) const
+{
   int nV = getNumberOfVertices();
-  return (0<=iV && iV<nV)?_isBoundaryVertex[iV]:false;
+  return (0 <= iV && iV < nV) ? _isBoundaryVertex[iV] : false;
 }
 
-bool PolygonMesh::isSingularVertex(const int iV) const {
+bool PolygonMesh::isSingularVertex(const int iV) const
+{
   int nV = getNumberOfVertices();
-  return (0<=iV && iV<nV && _nPartsVertex[iV]>1);
+  return (0 <= iV && iV < nV && _nPartsVertex[iV] > 1);
 }
 
 // properties of the whole mesh
 
-bool PolygonMesh::isRegular() const {
+bool PolygonMesh::isRegular() const
+{
   // TODO
   return false;
 }
 
-bool PolygonMesh::hasBoundary() const {
+bool PolygonMesh::hasBoundary() const
+{
   // TODO
   return false;
 }
