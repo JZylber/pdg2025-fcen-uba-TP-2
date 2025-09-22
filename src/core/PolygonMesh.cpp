@@ -80,23 +80,21 @@ PolygonMesh::PolygonMesh(const int nVertices, const vector<int> &coordIndex) : H
     int nHE = getNumberOfEdgeHalfEdges(iE);
     if (nHE != 2)
       continue; // should not happen
-    int iC0 = getEdgeHalfEdge(iE, 0);
-    int iC1 = getEdgeHalfEdge(iE, 1);
-    int iV00 = getSrc(iC0);
-    int iV01 = getDst(iC0);
-    int iV10 = getSrc(iC1);
-    int iV11 = getDst(iC1);
-    if (iV00 == iV11 && iV01 == iV10)
+    int iC00 = getEdgeHalfEdge(iE, 0);
+    int iC10 = getEdgeHalfEdge(iE, 1);
+    int iC01 = getNext(iC00);
+    int iC11 = getNext(iC10);
+    if (iC00 == iC11 && iC01 == iC10)
     {
       // consistently oriented
-      partition.join(iC0, iC1);
-      partition.join((iC0 + 1) % nC, (iC1 + 1) % nC);
+      partition.join(iC00, iC10);
+      partition.join(iC01, iC11);
     }
     else
     {
       // opposite orientation
-      partition.join(iC0, (iC1 + 1) % nC);
-      partition.join((iC0 + 1) % nC, iC1);
+      partition.join(iC00, iC11);
+      partition.join(iC01, iC10);
     }
   }
   // consistently oriented
@@ -224,12 +222,22 @@ bool PolygonMesh::isSingularVertex(const int iV) const
 
 bool PolygonMesh::isRegular() const
 {
-  // TODO
-  return false;
+  int nE = getNumberOfEdges();
+  for (int iE = 0; iE < nE; iE++)
+  {
+    if (!isRegularEdge(iE))
+      return false;
+  }
+  return true;
 }
 
 bool PolygonMesh::hasBoundary() const
 {
-  // TODO
+  int nE = getNumberOfEdges();
+  for (int iE = 0; iE < nE; iE++)
+  {
+    if (isBoundaryEdge(iE))
+      return true;
+  }
   return false;
 }
