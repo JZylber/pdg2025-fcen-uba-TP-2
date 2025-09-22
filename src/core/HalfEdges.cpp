@@ -54,7 +54,8 @@ HalfEdges::HalfEdges(const int nVertices, const vector<int> &coordIndex) : Edges
                                                                            _coordIndex(coordIndex),
                                                                            _twin(),
                                                                            _face(),
-                                                                           _edge2HalfEdges()
+                                                                           _firstCornerEdge(),
+                                                                           _cornerEdge()
 
 {
   // TODO
@@ -201,7 +202,6 @@ HalfEdges::HalfEdges(const int nVertices, const vector<int> &coordIndex) : Edges
   // get everything up to here implemented, debugged, and commited
   // before continuing
 
-  // NO ENTENDÍ COMO SE USAN
   // 5) initialize the array of arrays representing the half-edge to
   //    edge incident relationships
   //    _firstCornerEdge, and _cornerEdge
@@ -211,20 +211,18 @@ HalfEdges::HalfEdges(const int nVertices, const vector<int> &coordIndex) : Edges
   //    - set boundaries
   //      _firstCornerEdge[0]=0
   //      _firstCornerEdge[iE+1] = _firstCornerEdge[iE]+nFacesEdge[iE] (1<=iE<nE)
-  /*_firstCornerEdge.resize(nE + 1, 0);
+  _firstCornerEdge.resize(nE + 1, 0);
   _cornerEdge.resize(nC - iF, -1); // nC-nF
-  for (iE = 1; iE < nE; iE++)
+  for (iE = 0; iE < nE; iE++)
   {
     _firstCornerEdge[iE + 1] = _firstCornerEdge[iE] + nFacesEdge[iE];
   }
-  */
+
   // 6) fill the array of arrays - the indices of corners incident to
   //    edge iE (1 if boundary, 2 if regular, >2 if singular) should
   //    be stored consecutively in _cornerEdge starting at the
   //    location _firstCornerEdge[iE]
 
-  // PARCHE (ya se que lo van a corregir tengan piedad son muy largos de leer los tps)
-  _edge2HalfEdges.resize(nE);
   for (iC = 0; iC < nC; iC++)
   {
     int iV0 = getSrc(iC);
@@ -232,7 +230,10 @@ HalfEdges::HalfEdges(const int nVertices, const vector<int> &coordIndex) : Edges
       continue;
     int iV1 = getDst(iC);
     int iE = getEdge(iV0, iV1); // Edges method
-    _edge2HalfEdges[iE].push_back(iC);
+    int index = _firstCornerEdge[iE];
+    while (_cornerEdge[index] >= 0)
+      index++;
+    _cornerEdge[index] = iC;
   }
 }
 
@@ -342,12 +343,12 @@ int HalfEdges::getNumberOfEdgeHalfEdges(const int iE) const
 {
   if (!isValidIe(iE))
     return 0;
-  return static_cast<int>(_edge2HalfEdges[iE].size());
+  return _firstCornerEdge[iE + 1] - _firstCornerEdge[iE];
 }
 
 int HalfEdges::getEdgeHalfEdge(const int iE, const int j) const
 {
   if (!isValidEdgeHalfEdge(iE, j))
     return -1;
-  return _edge2HalfEdges[iE][j];
+  return _cornerEdge[_firstCornerEdge[iE] + j];
 }

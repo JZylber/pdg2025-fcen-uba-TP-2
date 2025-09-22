@@ -127,10 +127,8 @@ protected:
 
       // the half-edge to edge incidence relations is represented as an
       // array of arrays
-      // NO ENTENDÍ COMO SE USAN
-      // vector<int> _firstCornerEdge;
-      // vector<int> _cornerEdge;
-      vector<vector<int>> _edge2HalfEdges;
+      vector<int> _firstCornerEdge;
+      vector<int> _cornerEdge;
 };
 
 #endif /* _HALF_EDGES_HPP_ */
