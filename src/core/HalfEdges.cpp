@@ -45,8 +45,6 @@
 #include "HalfEdges.hpp"
 #include "Graph.hpp"
 
-#include "StrException.hpp"
-
 // 1) all half edges corresponding to regular mesh edges are made twins
 // 2) all the other edges are made boundary half edges (twin==-1)
 
@@ -87,7 +85,8 @@ HalfEdges::HalfEdges(const int nVertices, const vector<int> &coordIndex) : Edges
     int iV = _coordIndex[iC];
     if (iV < -1)
     {
-      throw new StrException("INVALID COORDINDEX (HalfEdges): coordIndex[" + to_string(iC) + "]=" + to_string(iV) + " < -1");
+      // No me salió importar StrException. No compilaba
+      throw 500; // invalid vertex index
     }
     if (iV >= nV)
     {
